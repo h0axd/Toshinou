@@ -5,63 +5,63 @@ Thanks for the idea to iNk
 
 class Variables {
   static get boxType() {
-    return "_-J3i";
+    return "_-zK";
   }
 
   static get attackerId() {
-    return "_-23F";
+    return "_-rm";
   }
 
   static get attackHp() {
-    return "_-z2j";
+    return "_-KP";
   }
 
   static get attackShd() {
-    return "_-w3R";
+    return "_-h3P";
   }
 
   static get attackedId() {
-    return "_-p1G";
+    return "_-P4Q";
   }
 
   static get moveDuration() {
-    return "_-g1H";
+    return "_-N4o";
   }
 
   static get shipDestoyedId() {
-    return "_-82k";
+    return "_-B2E";
   }
 
   static get heroInitMaxHp() {
-    return "_-r2";
+    return "_-W3T";
   }
 
   static get heroInitMaxShd() {
-    return "_-a2";
+    return "_-El";
   }
 
   static get heroInitHp() {
-    return "_-N3E";
+    return "_-h4w";
   }
 
   static get hpUpdateMaxHp() {
-    return "_-t1S";
+    return "_-43h";
   }
 
   static get hpUpdateHp() {
-    return "_-T2B";
+    return "_-74o";
   }
 
   static get selectMaxHp() {
-    return "_-t1S";
+    return "_-43h";
   }
 
   static get selectMaxShd() {
-    return "_-a2";
+    return "_-El";
   }
 
   static get selectHp() {
-    return "_-T2B";
+    return "_-74o";
   }
 
   static get assetCreateX() {
