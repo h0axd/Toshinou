@@ -289,7 +289,7 @@ function ggLogic() {
   let radius = mapCenter.y - 10;
 
   if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
-    this.ggSpeed ++;
+    this.ggSpeed++;
   } else {
     if (api.targetShip && api.targetShip.distanceTo(window.hero.position) > DISTANSE) {
       this.ggSpeed--;
