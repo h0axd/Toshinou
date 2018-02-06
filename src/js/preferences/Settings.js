@@ -3,7 +3,7 @@ Created by Freshek on 14.10.2017
 */
 
 class Settings {
-  constructor(collectBoxes, collectMaterials, moveRandomly, lockNpc, lockPlayers, killNpcs) {
+  constructor(collectBoxes, collectMaterials, moveRandomly, lockNpc, lockPlayers, killNpcs, useGGAlgorithm) {
     this._collectBoxes = collectBoxes === true;
     this._collectMaterials = collectMaterials === true;
     this._moveRandomly = moveRandomly === true;
@@ -11,6 +11,7 @@ class Settings {
     this._lockPlayers = lockPlayers === true;
     this._killNpcs = killNpcs === true;
     this._npcs = [];
+    this._useGGAlgorithm = useGGAlgorithm === true;
     this.npcCircleRadius = 500;
     this.reviveLimit = 5;
   }
@@ -61,6 +62,14 @@ class Settings {
 
   set killNpcs(value) {
     this._killNpcs = value === true;
+  }
+
+  get useGGAlgorithm() {
+    return this._useGGAlgorithm;
+  }
+
+  set useGGAlgorithm(value) {
+    this._useGGAlgorithm = value === true;
   }
 
   setNpc(name, val) {

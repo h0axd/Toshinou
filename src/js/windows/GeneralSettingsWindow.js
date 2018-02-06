@@ -132,6 +132,14 @@ class GeneralSettingsWindow {
           window.settings.reviveLimit = this.value;
           $('span:last-child', this.label).text(' (' + this.value + ')');
         }
+      },
+      {
+        name: 'useGGAlgorithm',
+        labelText: 'Use GG algorithm (experimental)',
+        appendTo: this.botSettingsWindow,
+        event: function() {
+          window.settings.useGGAlgorithm = this.checked;
+        }
       }
     ];
 

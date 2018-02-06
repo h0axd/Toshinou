@@ -107,6 +107,10 @@ function init() {
 }
 
 function logic() {
+  if (window.settings.useGGAlgorithm) {
+    ggLogic();
+    return;
+  }
   if (api.isRepairing && window.hero.hp !== window.hero.maxHp) {
     return;
   } else if (api.isRepairing && window.hero.hp === window.hero.maxHp) {
@@ -237,4 +241,70 @@ function logic() {
   }
 
   window.dispatchEvent(new CustomEvent("logicEnd"));
+}
+
+this.ggSpeed = 300;
+// TODO: move logics to separate files, make them more modular
+function ggLogic() {
+  if (api.targetShip == null) {
+    let ship = api.findNearestShip();
+    if (ship.ship) {
+      api.lockShip(ship.ship);
+      api.triedToLock = true;
+      api.targetShip = ship.ship;
+    }
+    return;
+  }
+
+  if (api.targetShip && window.settings.killNpcs) {
+    if (!api.triedToLock && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id)) {
+      api.targetShip.update();
+      let dist = api.targetShip.distanceTo(window.hero.position);
+      if (dist < 600) {
+        api.lockShip(api.targetShip);
+        api.triedToLock = true;
+        return;
+      }
+    }
+
+    if (!api.attacking && api.lockedShip) {
+      api.startLaserAttack();
+      api.lastAttack = $.now();
+      api.attacking = true;
+      return;
+    }
+  }
+
+  window.enemyAngle = window.enemyAngle ? window.enemyAngle : 0;
+  let DISTANSE = window.settings.npcCircleRadius;
+
+  let mapCenter = {
+    x: 20732 / 2,
+    y: 12830 / 2,
+  };
+
+  let maxRadius = mapCenter.y - 100;
+  let minRadius = 1000;
+
+  let radius = mapCenter.y - 10;
+
+  if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
+    this.speed ++;
+  } else {
+    if (api.targetShip && api.targetShip.distanceTo(window.hero.position) > DISTANSE) {
+      this.speed--;
+    }
+  }
+
+  let coefficient = this.speed / radius;
+  window.enemyAngle += coefficient;
+
+  let f =  Math.atan2(mapCenter.y - window.hero.position.y, mapCenter.x - window.hero.position.x) + window.enemyAngle;
+
+  let x = mapCenter.x + radius * Math.sin(f);
+  let y = mapCenter.y + radius * Math.cos(f);
+
+  window.dispatchEvent(new CustomEvent("logicEnd"));
+
+  api.move(x, y);
 }
