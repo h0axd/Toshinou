@@ -289,14 +289,14 @@ function ggLogic() {
   let radius = mapCenter.y - 10;
 
   if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
-    this.speed ++;
+    this.ggSpeed ++;
   } else {
     if (api.targetShip && api.targetShip.distanceTo(window.hero.position) > DISTANSE) {
-      this.speed--;
+      this.ggSpeed--;
     }
   }
 
-  let coefficient = this.speed / radius;
+  let coefficient = this.ggSpeed / radius;
   window.enemyAngle += coefficient;
 
   let f =  Math.atan2(mapCenter.y - window.hero.position.y, mapCenter.x - window.hero.position.x) + window.enemyAngle;
