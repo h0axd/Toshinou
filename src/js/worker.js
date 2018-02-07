@@ -243,16 +243,32 @@ function logic() {
   window.dispatchEvent(new CustomEvent("logicEnd"));
 }
 
-this.ggSpeed = 300;
+let ggSpeed = 150;
+let standardLogic = false;
+let lastAngle;
 // TODO: move logics to separate files, make them more modular
 function ggLogic() {
+  // find a ship
   if (api.targetShip == null) {
-    let ship = api.findNearestShip();
+    let ship = api.findNearestGGShip(false); // first, circle NPCs
     if (ship.ship) {
-      api.lockShip(ship.ship);
-      api.triedToLock = true;
       api.targetShip = ship.ship;
+      standardLogic = false;
+      console.log("locking ship, circle logic")
+    } else {
+      ship = api.findNearestGGShip(true); // kill NPCs in the corners
+      if (ship.ship) {
+        api.targetShip = ship.ship;
+        standardLogic = true;
+        console.log("locking ship, normal logic")
+      }
     }
+    return;
+  } else if (api.targetShip.percentOfHp < 20 && !standardLogic) { // too low hp, switch NPC
+    api.targetShip = null;
+    api.attacking = false;
+    api.triedToLock = false;
+    api.lockedShip = null;
     return;
   }
 
@@ -260,7 +276,7 @@ function ggLogic() {
     if (!api.triedToLock && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id)) {
       api.targetShip.update();
       let dist = api.targetShip.distanceTo(window.hero.position);
-      if (dist < 600) {
+      if (dist < 1000) {
         api.lockShip(api.targetShip);
         api.triedToLock = true;
         return;
@@ -275,34 +291,80 @@ function ggLogic() {
     }
   }
 
-  window.enemyAngle = window.enemyAngle ? window.enemyAngle : 0;
-  let DISTANSE = window.settings.npcCircleRadius;
+  let x, y;
 
   let mapCenter = {
     x: 20732 / 2,
     y: 12830 / 2,
   };
 
-  let maxRadius = mapCenter.y - 100;
-  let minRadius = 1000;
+  if (!standardLogic) {
+    api.targetShip.update();
+    // calculate movement position
+    window.enemyAngle = window.enemyAngle ? window.enemyAngle : 0;
+    let DISTANSE = window.settings.npcCircleRadius;
 
-  let radius = mapCenter.y - 10;
+    let maxRadius = mapCenter.y - 100;
+    let minRadius = 1000;
 
-  if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
-    this.ggSpeed++;
+    let radius = mapCenter.y - 10;
+
+    if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent && ggSpeed < 300) {
+      ggSpeed++;
+    } else {
+      let dist = api.targetShip.distanceTo(window.hero.position);
+      if (dist > 7000) {
+        return;
+      } else if (api.targetShip && dist > DISTANSE && ggSpeed > 50) {
+        ggSpeed--;
+      } else if (api.targetShip < DISTANSE && ggSpeed < 300) {
+        ggSpeed++;
+      }
+    }
+
+    let coefficient = ggSpeed / radius;
+    window.enemyAngle += coefficient;
+
+    let f =  Math.atan2(mapCenter.y - window.hero.position.y, mapCenter.x - window.hero.position.x) + window.enemyAngle;
+
+    x = mapCenter.x + radius * Math.sin(f);
+    y = mapCenter.y + radius * Math.cos(f);
   } else {
-    if (api.targetShip && api.targetShip.distanceTo(window.hero.position) > DISTANSE) {
-      this.ggSpeed--;
+    // y.........................x
+    // ...........................
+    // .............+.............
+    // ...........................
+    // x.........................y
+
+    let lastPos = api.targetShip.position;
+    api.targetShip.update();
+    let currentPos = api.targetShip.position;
+
+    let dx = Math.abs(currentPos.x - lastPos.x);
+    let dy = Math.abs(currentPos.y - lastPos.y);
+
+    if (dx != 0 && dy != 0) {
+      let rad = Math.atan2(dx, dy);
+      let opposite = rad + Math.PI / 180;
+      lastAngle = opposite;
+    }
+
+    if (lastAngle) {
+      x = currentPos.x + (window.settings.npcCircleRadius * Math.cos(lastAngle));
+      y = currentPos.y + (window.settings.npcCircleRadius * Math.sin(lastAngle));
+    } else {
+      // the ship doesn't move anymore and we didn't register the movement (sucky)
+      let a = Math.sqrt((window.settings.npcCircleRadius ^ 2) / 2); // not sure if correct
+
+      if (currentPos.x > mapCenter.x) { // bottom right corner
+        x = currentPos.x - a;
+        y = currentPos.y - a;
+      } else {
+        x = currentPos.x + a;
+        y = currentPos.y + a;
+      }
     }
   }
-
-  let coefficient = this.ggSpeed / radius;
-  window.enemyAngle += coefficient;
-
-  let f =  Math.atan2(mapCenter.y - window.hero.position.y, mapCenter.x - window.hero.position.x) + window.enemyAngle;
-
-  let x = mapCenter.x + radius * Math.sin(f);
-  let y = mapCenter.y + radius * Math.cos(f);
 
   window.dispatchEvent(new CustomEvent("logicEnd"));
 

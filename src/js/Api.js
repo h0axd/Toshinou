@@ -117,6 +117,34 @@ class Api {
     return {ship: finalShip, distance: minDist};
   }
 
+  findNearestGGShip(skipHpCheck) {
+    let minDist = 100000;
+    let finalShip = null;
+
+    if (!window.settings.killNpcs)
+      return {ship: null, distance: minDist};
+
+    for (let property in this.ships) {
+      let ship = this.ships[property];
+
+      if (ship.percentOfHp < 20 && !skipHpCheck) {
+        continue;
+      }
+
+      ship.update();
+      let dist = ship.distanceTo(window.hero.position);
+
+      if (dist < minDist) {
+        if (ship.isNpc) {
+          finalShip = ship;
+          minDist = dist;
+        }
+      }
+    }
+
+    return {ship: finalShip, distance: minDist};
+  }
+
   findNearestGate() {
     var minDist = 100000;
     var finalGate;
